@@ -37,8 +37,8 @@ import emdevif.errorHandler;
 import rmdev.deviceModel.sensor.imu;
 
 #if (RMDEV_DRIVER_BMI088_USE_SPI)
-import emdevif.peripheralModels.spi;
-import emdevif.peripheralModels.gpio;
+import emdevif.peripheral.spi;
+import emdevif.peripheral.gpio;
 import emdevif.timeline;
 #else
 import emdevif.peripheralModels.i2c;

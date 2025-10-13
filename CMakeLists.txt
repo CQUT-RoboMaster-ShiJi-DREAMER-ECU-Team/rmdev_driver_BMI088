@@ -16,7 +16,7 @@ target_sources(${PROJECT_NAME}
 
 target_link_libraries(${PROJECT_NAME}
     PUBLIC emdevif_core
-    PRIVATE emdevif_compile_options emdevif_peripheral_models emdevif_timeline
+    PRIVATE emdevif_compile_options emdevif_peripheral emdevif_timeline
         rmdev_device_model
 )
 
