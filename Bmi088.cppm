@@ -34,7 +34,7 @@ export module rmdev.driver.imu.bmi088;
 
 import emdevif.typeTraits;
 import emdevif.errorHandler;
-import rmdev.deviceModel.sensor.imu;
+export import rmdev.deviceModel.sensor.imu;
 
 #if (RMDEV_DRIVER_BMI088_USE_SPI)
 import emdevif.peripheral.spi;
@@ -149,15 +149,14 @@ private:
     }
 
     template<std::size_t length>
-    void readMuliReg(const uint8_t reg, uint8_t (&data)[length]) const noexcept
+        requires(length <= 8)
+    void readMuliReg(const uint8_t reg, uint8_t* data) const noexcept
     {
         (void)readWriteByte(reg | 0x80U);
 
-        std::array<uint8_t, length> tx_buffer;
-        tx_buffer.fill(0x55);
-        static_assert(emdevif::is_consteval([&] { return tx_buffer.fill(0x55); }));
+        constexpr std::array<uint8_t, 8> tx_buffer{0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55};
 
-        spi_.transmitReceive(false, tx_buffer, data, 1000);
+        spi_.transmitReceive(false, {tx_buffer.data(), length}, {data, length}, 1000);
     }
 
     static constexpr auto BMI088_TEMP_FACTOR = 0.125f;
@@ -531,29 +530,29 @@ private:
         BMI088_accel_read_muli_reg(BMI088_ACCEL_XOUT_L, buf, 6);
 
         bmi088_raw_temp = (int16_t)((buf[1]) << 8) | buf[0];
-        bmi088->Accel[0] = bmi088_raw_temp * BMI088_ACCEL_SEN * bmi088->AccelScale;
+        bmi088->accel[0] = bmi088_raw_temp * BMI088_ACCEL_SEN * bmi088->AccelScale;
         bmi088_raw_temp = (int16_t)((buf[3]) << 8) | buf[2];
-        bmi088->Accel[1] = bmi088_raw_temp * BMI088_ACCEL_SEN * bmi088->AccelScale;
+        bmi088->accel[1] = bmi088_raw_temp * BMI088_ACCEL_SEN * bmi088->AccelScale;
         bmi088_raw_temp = (int16_t)((buf[5]) << 8) | buf[4];
-        bmi088->Accel[2] = bmi088_raw_temp * BMI088_ACCEL_SEN * bmi088->AccelScale;
+        bmi088->accel[2] = bmi088_raw_temp * BMI088_ACCEL_SEN * bmi088->AccelScale;
 
         BMI088_gyro_read_muli_reg(BMI088_GYRO_CHIP_ID, buf, 8);
         if (buf[0] == BMI088_GYRO_CHIP_ID_VALUE) {
             if (caliOffset) {
                 bmi088_raw_temp = (int16_t)((buf[3]) << 8) | buf[2];
-                bmi088->Gyro[0] = bmi088_raw_temp * BMI088_GYRO_SEN - bmi088->GyroOffset[0];
+                bmi088->gyro[0] = bmi088_raw_temp * BMI088_GYRO_SEN - bmi088->GyroOffset[0];
                 bmi088_raw_temp = (int16_t)((buf[5]) << 8) | buf[4];
-                bmi088->Gyro[1] = bmi088_raw_temp * BMI088_GYRO_SEN - bmi088->GyroOffset[1];
+                bmi088->gyro[1] = bmi088_raw_temp * BMI088_GYRO_SEN - bmi088->GyroOffset[1];
                 bmi088_raw_temp = (int16_t)((buf[7]) << 8) | buf[6];
-                bmi088->Gyro[2] = bmi088_raw_temp * BMI088_GYRO_SEN - bmi088->GyroOffset[2];
+                bmi088->gyro[2] = bmi088_raw_temp * BMI088_GYRO_SEN - bmi088->GyroOffset[2];
             }
             else {
                 bmi088_raw_temp = (int16_t)((buf[3]) << 8) | buf[2];
-                bmi088->Gyro[0] = bmi088_raw_temp * BMI088_GYRO_SEN;
+                bmi088->gyro[0] = bmi088_raw_temp * BMI088_GYRO_SEN;
                 bmi088_raw_temp = (int16_t)((buf[5]) << 8) | buf[4];
-                bmi088->Gyro[1] = bmi088_raw_temp * BMI088_GYRO_SEN;
+                bmi088->gyro[1] = bmi088_raw_temp * BMI088_GYRO_SEN;
                 bmi088_raw_temp = (int16_t)((buf[7]) << 8) | buf[6];
-                bmi088->Gyro[2] = bmi088_raw_temp * BMI088_GYRO_SEN;
+                bmi088->gyro[2] = bmi088_raw_temp * BMI088_GYRO_SEN;
             }
         }
         BMI088_accel_read_muli_reg(BMI088_TEMP_M, buf, 2);
@@ -564,7 +563,7 @@ private:
             bmi088_raw_temp -= 2048;
         }
 
-        bmi088->Temperature = bmi088_raw_temp * BMI088_TEMP_FACTOR + BMI088_TEMP_OFFSET;
+        bmi088->temperature = bmi088_raw_temp * BMI088_TEMP_FACTOR + BMI088_TEMP_OFFSET;
     }
 
     void readImuDataImpl() noexcept
