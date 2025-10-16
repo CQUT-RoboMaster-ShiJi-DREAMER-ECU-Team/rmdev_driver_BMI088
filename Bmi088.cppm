@@ -18,7 +18,7 @@ module;
 #include "BMI088reg.h"
 
 #include "emdevif/concepts.hpp"
-#include "emdevif/fatal_handler.hpp"
+#include "emdevif/fatal_handler.h"
 #include "emdevif/integer_suffix.hpp"
 
 #ifndef RMDEV_DRIVER_BMI088_USE_SPI
