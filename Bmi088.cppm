@@ -169,7 +169,7 @@ private:
     static constexpr auto BMI088_ACCEL_DATA_READY_BIT = 1;
     static constexpr auto BMI088_ACCEL_TEMP_DATA_READY_BIT = 2;
 
-    static constexpr auto BMI088_LONG_DELAY_TIME = 80;
+    static constexpr auto BMI088_LONG_DELAY_TIME = 120;
     static constexpr auto BMI088_COM_WAIT_SENSOR_TIME = 150;
 
     static constexpr auto BMI088_ACCEL_IIC_ADDRESSE = (0x18 << 1);
@@ -513,7 +513,7 @@ private:
 
     emdevif::ErrorCode deviceInitImpl(const bool calibrate) noexcept
     {
-        if (BMI088_init(calibrate) != BMI088_NO_ERROR) {
+        if (BMI088_init(calibrate) == BMI088_NO_ERROR) {
             return emdevif::ErrorCode::Success;
         }
 
