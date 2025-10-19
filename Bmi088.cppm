@@ -96,7 +96,7 @@ private:
     emdevif::Gpio cs_gyro_;
 
 private:
-    struct Bmi088Data : rmdev::Imu<DataType> {
+    struct Bmi088Data : public rmdev::Imu<DataType> {
         DataType temp_when_cali;
         DataType accel_scale;
 
