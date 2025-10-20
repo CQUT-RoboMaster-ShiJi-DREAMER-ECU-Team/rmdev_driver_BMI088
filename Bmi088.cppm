@@ -61,15 +61,27 @@ public:
     using DataType = T;
 
 public:
+    /**
+     * 获取 IMU 数据（只有角速度、加速度、温度的数据有效）
+     * @return IMU 数据的引用
+     */
     constexpr rmdev::Imu<DataType>& getImuData() noexcept
     {
-        return imu_data_;
+        return static_cast<rmdev::Imu<DataType>&>(imu_data_);
     }
+    /**
+     * @overload
+     * @return IMU 数据常量引用
+     */
     constexpr const rmdev::Imu<DataType>& getImuData() const noexcept
     {
-        return imu_data_;
+        return static_cast<rmdev::Imu<DataType>&>(imu_data_);
     }
 
+    /**
+     * 设备初始化
+     * @param calibrate 是否进行校准
+     */
     void deviceInit(const bool calibrate = true) noexcept
     {
         using namespace emdevif::literals;
@@ -84,6 +96,9 @@ public:
         }
     }
 
+    /**
+     * 从传感器处读取 IMU 数据
+     */
     void readImuData() noexcept
     {
         readImuDataImpl();
@@ -552,18 +567,18 @@ private:
                 bmi088_raw_temp = (int16_t)((buf[5]) << 8) | buf[4];
                 bmi088->gyro[1] = bmi088_raw_temp * BMI088_GYRO_SEN;
                 bmi088_raw_temp = (int16_t)((buf[7]) << 8) | buf[6];
-                bmi088->gyro[2] = bmi088_raw_temp * BMI088_GYRO_SEN;
+                bmi088->gyro[2] = static_cast<float>(bmi088_raw_temp) * BMI088_GYRO_SEN;
             }
         }
         BMI088_accel_read_muli_reg(BMI088_TEMP_M, buf, 2);
 
-        bmi088_raw_temp = (int16_t)((buf[0] << 3) | (buf[1] >> 5));
+        bmi088_raw_temp = static_cast<int16_t>((buf[0] << 3) | (buf[1] >> 5));
 
         if (bmi088_raw_temp > 1023) {
             bmi088_raw_temp -= 2048;
         }
 
-        bmi088->temperature = bmi088_raw_temp * BMI088_TEMP_FACTOR + BMI088_TEMP_OFFSET;
+        bmi088->temperature = static_cast<float>(bmi088_raw_temp) * BMI088_TEMP_FACTOR + BMI088_TEMP_OFFSET;
     }
 
     void readImuDataImpl() noexcept
