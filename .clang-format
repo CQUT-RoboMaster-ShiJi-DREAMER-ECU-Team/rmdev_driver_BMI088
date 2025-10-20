@@ -35,6 +35,7 @@ SpacesInCStyleCastParentheses: false
 SpaceAfterCStyleCast: false
 
 PointerAlignment: Left
+ReferenceAlignment: Left
 
 DerivePointerAlignment: false
 
