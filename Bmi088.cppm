@@ -17,7 +17,6 @@ module;
 
 #include "BMI088reg.h"
 
-#include "emdevif/concepts.hpp"
 #include "emdevif/fatal_handler.h"
 #include "emdevif/integer_suffix.hpp"
 
@@ -33,6 +32,7 @@ module;
 export module rmdev.driver.imu.bmi088;
 
 import emdevif.typeTraits;
+import emdevif.concepts;
 import emdevif.errorHandler;
 export import rmdev.deviceModel.sensor.imu;
 
