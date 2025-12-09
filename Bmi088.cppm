@@ -1,7 +1,5 @@
 /**
  * @file Bmi088.cppm
- * @author DuYicheng
- * @date 2025-10-07
  * @brief BMI088 驱动
  */
 
