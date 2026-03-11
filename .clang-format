@@ -61,6 +61,8 @@ AlignConsecutiveMacros:
     AlignCompound: false
     PadOperators: false
 
+IndentPPDirectives: BeforeHash
+
 AlignTrailingComments:
     Kind: Always
     OverEmptyLines: 1
