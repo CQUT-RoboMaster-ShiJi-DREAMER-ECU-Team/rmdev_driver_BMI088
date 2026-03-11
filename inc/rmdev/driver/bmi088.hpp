@@ -51,9 +51,9 @@ namespace rmdev::inline drivers {
     #define GzOFFSET (-0.00135726751f)
     #define gNORM    9.7229061133f
 
-export constexpr std::size_t init_fail_max_count = RMDEV_DRIVER_BMI088_INIT_FAIL_MAX_COUNT;
+EMDEVIF_MODULE_EXPORT constexpr std::size_t init_fail_max_count = RMDEV_DRIVER_BMI088_INIT_FAIL_MAX_COUNT;
 
-export template<emdevif::ArithmeticType T = float>
+EMDEVIF_MODULE_EXPORT template<emdevif::ArithmeticType T = float>
 class Bmi088
 {
 public:
