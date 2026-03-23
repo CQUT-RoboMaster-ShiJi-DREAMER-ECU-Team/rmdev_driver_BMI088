@@ -18,7 +18,7 @@ module;
 
 #define EMDEVIF_MODULE_INTERFACE_UNIT
 
-export module rmdev.driver.imu.bmi088;
+export module rmdev.driver.bmi088;
 
 import emdevif.core.type_traits;
 import emdevif.core.concepts;
