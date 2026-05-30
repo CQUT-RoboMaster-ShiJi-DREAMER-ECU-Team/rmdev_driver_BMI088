@@ -53,7 +53,12 @@ namespace rmdev::inline drivers {
 
 EMDEVIF_MODULE_EXPORT constexpr std::size_t init_fail_max_count = RMDEV_DRIVER_BMI088_INIT_FAIL_MAX_COUNT;
 
-EMDEVIF_MODULE_EXPORT template<emdevif::ArithmeticType T = float>
+/**
+ * @brief BMI088 六轴惯性传感器驱动类
+ * @tparam T 数据浮点类型
+ */
+EMDEVIF_MODULE_EXPORT
+template<emdevif::ArithmeticType T = float>
 class Bmi088
 {
 public:
@@ -110,51 +115,83 @@ private:
     emdevif::Gpio cs_gyro_;
 
 private:
+    /**
+     * @brief BMI088 内部数据，继承自 IMU 抽象模型，包含标定参数
+     */
     struct Bmi088Data : public rmdev::Imu<DataType> {
-        DataType temp_when_cali;
-        DataType accel_scale;
-
-        DataType gyro_offset[3];
-
-        DataType g_norm;
+        DataType temp_when_cali;  ///< 标定时传感器温度
+        DataType accel_scale;     ///< 加速度计标度因数
+        DataType gyro_offset[3];  ///< 陀螺仪零偏（X, Y, Z）
+        DataType g_norm;          ///< 重力加速度模长标定值
     } imu_data_;
 
+    /**
+     * @brief 获取完整的 BMI088 数据（含标定参数）
+     * @return 完整 BMI088 数据的引用
+     */
     constexpr Bmi088Data& getFullData() noexcept
     {
         return imu_data_;
     }
+    /**
+     * @overload
+     * @return 完整 BMI088 数据的常量引用
+     */
     constexpr const Bmi088Data& getFullData() const noexcept
     {
         return imu_data_;
     }
 
 public:
+    /**
+     * @brief 构造 BMI088 驱动对象（SPI 模式）
+     * @param spi SPI 外设
+     * @param cs_accel 加速度计片选引脚
+     * @param cs_gyro 陀螺仪片选引脚
+     */
     constexpr Bmi088(const emdevif::Spi& spi, const emdevif::Gpio& cs_accel, const emdevif::Gpio& cs_gyro) noexcept
         : spi_(spi), cs_accel_(cs_accel), cs_gyro_(cs_gyro)
     {
     }
 
 private:
+    /**
+     * @brief 拉低加速度计片选线
+     */
     void accelCsL() const noexcept
     {
         cs_accel_.write(emdevif::Gpio::Reset);
     }
 
+    /**
+     * @brief 拉高加速度计片选线
+     */
     void accelCsH() const noexcept
     {
         cs_accel_.write(emdevif::Gpio::Set);
     }
 
+    /**
+     * @brief 拉低陀螺仪片选线
+     */
     void gyroCsL() const noexcept
     {
         cs_gyro_.write(emdevif::Gpio::Reset);
     }
 
+    /**
+     * @brief 拉高陀螺仪片选线
+     */
     void gyroCsH() const noexcept
     {
         cs_gyro_.write(emdevif::Gpio::Set);
     }
 
+    /**
+     * @brief SPI 读写一个字节
+     * @param wrtie_value 待写入的值
+     * @return 读取到的值
+     */
     uint8_t readWriteByte(uint8_t wrtie_value) const noexcept  // NOLINT(*-use-nodiscard)
     {
         uint8_t read_value;
@@ -200,6 +237,9 @@ private:
     static constexpr auto BMI088_GYRO_250_SEN = 0.00013315805450396191230191732547673f;
     static constexpr auto BMI088_GYRO_125_SEN = 0.000066579027251980956150958662738366f;
 
+    /**
+     * @brief BMI088 传感器状态与错误码
+     */
     enum Status : uint8_t {
         BMI088_NO_ERROR = 0x00,
         BMI088_ACC_PWR_CTRL_ERROR = 0x01,
@@ -244,14 +284,24 @@ private:
     static constexpr float BMI088_ACCEL_SEN = BMI088_ACCEL_6G_SEN;
     static constexpr float BMI088_GYRO_SEN = BMI088_GYRO_2000_SEN;
 
-    uint8_t error = BMI088_NO_ERROR;
+    uint8_t error = BMI088_NO_ERROR;  ///< 传感器错误状态标志位
 
+    /**
+     * @brief SPI 写入单个寄存器（SPI 模式，不控制片选）
+     * @param reg 寄存器地址
+     * @param data 待写入的数据
+     */
     void BMI088_write_single_reg(const uint8_t reg, const uint8_t data) const noexcept
     {
         readWriteByte(reg);
         readWriteByte(data);
     }
 
+    /**
+     * @brief SPI 读取单个寄存器（SPI 模式，不控制片选）
+     * @param reg 寄存器地址
+     * @param[out] return_data 读取到的数据
+     */
     void BMI088_read_single_reg(const uint8_t reg, uint8_t* return_data) const noexcept
     {
         readWriteByte(reg | 0x80);
@@ -312,6 +362,10 @@ private:
     uint8_t res = 0;
     uint8_t write_reg_num = 0;
 
+    /**
+     * @brief 初始化加速度计
+     * @return BMI088_NO_ERROR 成功，否则返回对应错误码
+     */
     Status bmi088_accel_init() noexcept
     {
         // check commiunication
@@ -355,6 +409,10 @@ private:
         return BMI088_NO_ERROR;
     }
 
+    /**
+     * @brief 初始化陀螺仪
+     * @return BMI088_NO_ERROR 成功，否则返回对应错误码
+     */
     Status bmi088_gyro_init() noexcept
     {
         // check commiunication
@@ -398,6 +456,10 @@ private:
     float gNormDiff;
     int16_t caliCount = 0;
 
+    /**
+     * @brief 校准陀螺仪零偏和加速度计标度因数
+     * @param bmi088 BMI088 数据结构体指针
+     */
     void Calibrate_MPU_Offset(Bmi088Data* bmi088) noexcept
     {
         DataType startTime;
@@ -503,6 +565,11 @@ private:
         bmi088->accel_scale = 9.81f / bmi088->g_norm;
     }
 
+    /**
+     * @brief 执行完整的 BMI088 初始化流程（含可选校准）
+     * @param calibrate 是否执行零偏校准
+     * @return 初始化状态（成功返回 BMI088_NO_ERROR）
+     */
     Status BMI088_init(const bool calibrate) noexcept
     {
         error = BMI088_NO_ERROR;
@@ -525,6 +592,13 @@ private:
         return static_cast<Status>(error);
     }
 
+    /**
+     * @brief 设备初始化实现
+     * @param calibrate 是否进行校准
+     * @return 错误码
+     * @retval emdevif::ErrorCode::Success 初始化成功
+     * @retval emdevif::ErrorCode::OperationFail 初始化失败
+     */
     emdevif::ErrorCode deviceInitImpl(const bool calibrate) noexcept
     {
         if (BMI088_init(calibrate) == BMI088_NO_ERROR) {
@@ -536,6 +610,10 @@ private:
 
     uint8_t caliOffset = 1;
 
+    /**
+     * @brief 读取 BMI088 传感器的加速度、角速度和温度数据
+     * @param bmi088 BMI088 数据结构体指针
+     */
     void BMI088_Read(Bmi088Data* bmi088)
     {
         static uint8_t buf[8] = {0, 0, 0, 0, 0, 0};
@@ -580,6 +658,9 @@ private:
         bmi088->temperature = static_cast<float>(bmi088_raw_temp) * BMI088_TEMP_FACTOR + BMI088_TEMP_OFFSET;
     }
 
+    /**
+     * @brief 读取 IMU 数据的实现
+     */
     void readImuDataImpl() noexcept
     {
         BMI088_Read(&getFullData());
