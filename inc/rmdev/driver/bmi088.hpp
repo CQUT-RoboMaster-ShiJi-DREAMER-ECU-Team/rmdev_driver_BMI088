@@ -7,14 +7,11 @@
 #ifndef RMDEV_DRIVER_BMI088_HPP
     #define RMDEV_DRIVER_BMI088_HPP
 
-    #include "emdevif/core/detail/config.hpp"
-
     #ifndef RMDEV_DRIVER_BMI088_USE_SPI
         #error \
             "Please add a defination `RMDEV_DRIVER_BMI088_USE_SPI\' to decide how to connect with BMI088. Set it to true: use SPI; false: use I2C."
     #endif
 
-    #ifndef EMDEVIF_MODULE_INTERFACE_UNIT
         #include <cstdint>
         #include <cmath>
 
@@ -37,7 +34,6 @@
         #else
             #include "emdevif/peripheral/i2c.hpp"
         #endif
-    #endif
 
     #ifndef RMDEV_DRIVER_BMI088_INIT_FAIL_MAX_COUNT
         #define RMDEV_DRIVER_BMI088_INIT_FAIL_MAX_COUNT (std::numeric_limits<std::size_t>::max())
@@ -51,13 +47,12 @@ namespace rmdev::inline drivers {
     #define GzOFFSET (-0.00135726751f)
     #define gNORM    9.7229061133f
 
-EMDEVIF_MODULE_EXPORT constexpr std::size_t init_fail_max_count = RMDEV_DRIVER_BMI088_INIT_FAIL_MAX_COUNT;
+constexpr std::size_t init_fail_max_count = RMDEV_DRIVER_BMI088_INIT_FAIL_MAX_COUNT;
 
 /**
  * @brief BMI088 六轴惯性传感器驱动类
  * @tparam T 数据浮点类型
  */
-EMDEVIF_MODULE_EXPORT
 template<emdevif::ArithmeticType T = float>
 class Bmi088
 {

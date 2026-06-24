@@ -7,35 +7,11 @@
 
 module;
 
-#include <cstdint>
-#include <cmath>
-
-#include <array>
-#include <limits>
-
-#include "rmdev/driver/bmi088/BMI088reg.h"
-#include "emdevif/core/fatal_handler.h"
-
-#define EMDEVIF_MODULE_INTERFACE_UNIT
+#include "rmdev/driver/bmi088.hpp"
 
 export module rmdev.driver.bmi088;
 
-import emdevif.core.type_traits;
-import emdevif.core.concepts;
-import emdevif.core.error_handler;
-import emdevif.core.integer_suffix;
-import rmdev.device_model.sensor.imu;
-
-#if (RMDEV_DRIVER_BMI088_USE_SPI)
-import emdevif.peripheral.spi;
-import emdevif.peripheral.gpio;
-import emdevif.timeline;
-#else
-import emdevif.peripheralModels.i2c;
-#endif
-
-#ifdef __clang__
-    #pragma clang diagnostic ignored "-Winclude-angled-in-module-purview"
-#endif
-
-#include "rmdev/driver/bmi088.hpp"
+export namespace rmdev {
+    using ::rmdev::init_fail_max_count;
+    using ::rmdev::Bmi088;
+}
