@@ -12,19 +12,19 @@
             "Please add a defination `RMDEV_DRIVER_BMI088_USE_SPI\' to decide how to connect with BMI088. Set it to true: use SPI; false: use I2C."
     #endif
 
-        #include <cstdint>
         #include <cmath>
+        #include <cstdint>
 
         #include <array>
         #include <limits>
 
-        #include "rmdev/driver/bmi088/BMI088reg.h"
         #include "emdevif/core/fatal_handler.h"
+        #include "rmdev/driver/bmi088/BMI088reg.h"
 
-        #include "emdevif/core/integer_suffix.hpp"
         #include "emdevif/core/concepts.hpp"
-        #include "emdevif/core/type_traits.hpp"
         #include "emdevif/core/error_handler.hpp"
+        #include "emdevif/core/integer_suffix.hpp"
+        #include "emdevif/core/type_traits.hpp"
         #include "rmdev/device_model/sensor/imu.hpp"
 
         #if (RMDEV_DRIVER_BMI088_USE_SPI)
@@ -380,7 +380,9 @@ private:
         emdevif::Timeline::pauseDelayMs(1);
 
         // check the "who am I"
-        if (res != BMI088_ACC_CHIP_ID_VALUE) return BMI088_NO_SENSOR;
+        if (res != BMI088_ACC_CHIP_ID_VALUE) {
+            return BMI088_NO_SENSOR;
+        }
         // do
         // {
         //     BMI088_accel_read_single_reg(BMI088_ACC_CHIP_ID, res);
@@ -426,7 +428,9 @@ private:
         emdevif::Timeline::pauseDelayMs(1);
 
         // check the "who am I"
-        if (res != BMI088_GYRO_CHIP_ID_VALUE) return BMI088_NO_SENSOR;
+        if (res != BMI088_GYRO_CHIP_ID_VALUE) {
+            return BMI088_NO_SENSOR;
+        }
 
         // set gyro sonsor config and check
         for (write_reg_num = 0; write_reg_num < BMI088_WRITE_GYRO_REG_NUM; write_reg_num++) {
@@ -479,7 +483,9 @@ private:
 
                 BMI088_accel_read_muli_reg(BMI088_TEMP_M, buf, 2);
                 bmi088_raw_temp = static_cast<int16_t>((buf[0] << 3) | (buf[1] >> 5));
-                if (bmi088_raw_temp > 1023) bmi088_raw_temp -= 2048;
+                if (bmi088_raw_temp > 1023) {
+                    bmi088_raw_temp -= 2048;
+                }
                 bmi088->temp_when_cali = static_cast<float>(bmi088_raw_temp) * BMI088_TEMP_FACTOR + BMI088_TEMP_OFFSET;
 
                 break;
@@ -526,29 +532,45 @@ private:
                     }
                 }
                 else {
-                    if (gNormTemp > gNormMax) gNormMax = gNormTemp;
-                    if (gNormTemp < gNormMin) gNormMin = gNormTemp;
+                    if (gNormTemp > gNormMax) {
+                        gNormMax = gNormTemp;
+                    }
+                    if (gNormTemp < gNormMin) {
+                        gNormMin = gNormTemp;
+                    }
                     for (uint8_t j = 0; j < 3; j++) {
-                        if (bmi088->gyro[j] > gyroMax[j]) gyroMax[j] = bmi088->gyro[j];
-                        if (bmi088->gyro[j] < gyroMin[j]) gyroMin[j] = bmi088->gyro[j];
+                        if (bmi088->gyro[j] > gyroMax[j]) {
+                            gyroMax[j] = bmi088->gyro[j];
+                        }
+                        if (bmi088->gyro[j] < gyroMin[j]) {
+                            gyroMin[j] = bmi088->gyro[j];
+                        }
                     }
                 }
 
                 // 数据差异过大认为收到外界干扰，需重新校准
                 gNormDiff = gNormMax - gNormMin;
-                for (uint8_t j = 0; j < 3; j++) gyroDiff[j] = gyroMax[j] - gyroMin[j];
-                if (gNormDiff > 0.5f || gyroDiff[0] > 0.15f || gyroDiff[1] > 0.15f || gyroDiff[2] > 0.15f) break;
+                for (uint8_t j = 0; j < 3; j++) {
+                    gyroDiff[j] = gyroMax[j] - gyroMin[j];
+                }
+                if (gNormDiff > 0.5f || gyroDiff[0] > 0.15f || gyroDiff[1] > 0.15f || gyroDiff[2] > 0.15f) {
+                    break;
+                }
                 emdevif::Timeline::pauseDelayUs(500);
             }
 
             // 取平均值得到标定结果
             bmi088->g_norm /= (DataType)CaliTimes;
-            for (uint8_t i = 0; i < 3; i++) bmi088->gyro_offset[i] /= (DataType)CaliTimes;
+            for (uint8_t i = 0; i < 3; i++) {
+                bmi088->gyro_offset[i] /= (DataType)CaliTimes;
+            }
 
             // 记录标定时IMU温度
             BMI088_accel_read_muli_reg(BMI088_TEMP_M, buf, 2);
             bmi088_raw_temp = (int16_t)((buf[0] << 3) | (buf[1] >> 5));
-            if (bmi088_raw_temp > 1023) bmi088_raw_temp -= 2048;
+            if (bmi088_raw_temp > 1023) {
+                bmi088_raw_temp -= 2048;
+            }
             bmi088->temp_when_cali = static_cast<float>(bmi088_raw_temp) * BMI088_TEMP_FACTOR + BMI088_TEMP_OFFSET;
 
             caliCount++;
