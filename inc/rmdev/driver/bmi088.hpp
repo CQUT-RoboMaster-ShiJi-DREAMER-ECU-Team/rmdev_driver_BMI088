@@ -5,47 +5,47 @@
 
 #pragma once
 #ifndef RMDEV_DRIVER_BMI088_HPP
-    #define RMDEV_DRIVER_BMI088_HPP
+#define RMDEV_DRIVER_BMI088_HPP
 
-    #ifndef RMDEV_DRIVER_BMI088_USE_SPI
-        #error \
-            "Please add a defination `RMDEV_DRIVER_BMI088_USE_SPI\' to decide how to connect with BMI088. Set it to true: use SPI; false: use I2C."
-    #endif
+#ifndef RMDEV_DRIVER_BMI088_USE_SPI
+#error \
+    "Please add a defination `RMDEV_DRIVER_BMI088_USE_SPI\' to decide how to connect with BMI088. Set it to true: use SPI; false: use I2C."
+#endif
 
-        #include <cmath>
-        #include <cstdint>
+#include <cmath>
+#include <cstdint>
 
-        #include <array>
-        #include <limits>
+#include <array>
+#include <limits>
 
-        #include "emdevif/core/fatal_handler.h"
-        #include "rmdev/driver/bmi088/BMI088reg.h"
+#include "emdevif/core/fatal_handler.h"
+#include "rmdev/driver/bmi088/BMI088reg.h"
 
-        #include "emdevif/core/concepts.hpp"
-        #include "emdevif/core/error_handler.hpp"
-        #include "emdevif/core/integer_suffix.hpp"
-        #include "emdevif/core/type_traits.hpp"
-        #include "rmdev/device_model/sensor/imu.hpp"
+#include "emdevif/core/concepts.hpp"
+#include "emdevif/core/error_handler.hpp"
+#include "emdevif/core/integer_suffix.hpp"
+#include "emdevif/core/type_traits.hpp"
+#include "rmdev/device_model/sensor/imu.hpp"
 
-        #if (RMDEV_DRIVER_BMI088_USE_SPI)
-            #include "emdevif/peripheral/spi.hpp"
-            #include "emdevif/peripheral/gpio.hpp"
-            #include "emdevif/timeline.hpp"
-        #else
-            #include "emdevif/peripheral/i2c.hpp"
-        #endif
+#if (RMDEV_DRIVER_BMI088_USE_SPI)
+#include "emdevif/peripheral/spi.hpp"
+#include "emdevif/peripheral/gpio.hpp"
+#include "emdevif/timeline.hpp"
+#else
+#include "emdevif/peripheral/i2c.hpp"
+#endif
 
-    #ifndef RMDEV_DRIVER_BMI088_INIT_FAIL_MAX_COUNT
-        #define RMDEV_DRIVER_BMI088_INIT_FAIL_MAX_COUNT (std::numeric_limits<std::size_t>::max())
-    #endif
+#ifndef RMDEV_DRIVER_BMI088_INIT_FAIL_MAX_COUNT
+#define RMDEV_DRIVER_BMI088_INIT_FAIL_MAX_COUNT (std::numeric_limits<std::size_t>::max())
+#endif
 
 namespace rmdev::inline drivers {
 
-    // 需手动修改
-    #define GxOFFSET 0.001894738333f
-    #define GyOFFSET (-0.00337262948f)
-    #define GzOFFSET (-0.00135726751f)
-    #define gNORM    9.7229061133f
+// 需手动修改
+#define GxOFFSET 0.001894738333f
+#define GyOFFSET (-0.00337262948f)
+#define GzOFFSET (-0.00135726751f)
+#define gNORM    9.7229061133f
 
 constexpr std::size_t init_fail_max_count = RMDEV_DRIVER_BMI088_INIT_FAIL_MAX_COUNT;
 
@@ -103,7 +103,7 @@ public:
         readImuDataImpl();
     }
 
-    #if (RMDEV_DRIVER_BMI088_USE_SPI)
+#if (RMDEV_DRIVER_BMI088_USE_SPI)
 private:
     emdevif::Spi spi_;
     emdevif::Gpio cs_accel_;
@@ -303,56 +303,56 @@ private:
         *return_data = readWriteByte(0x55);
     }
 
-        #define BMI088_accel_write_single_reg(reg, data) \
-            do {                                         \
-                accelCsL();                              \
-                BMI088_write_single_reg((reg), (data));  \
-                accelCsH();                              \
-            } while (0)
+#define BMI088_accel_write_single_reg(reg, data) \
+    do {                                         \
+        accelCsL();                              \
+        BMI088_write_single_reg((reg), (data));  \
+        accelCsH();                              \
+    } while (0)
 
-        #define BMI088_accel_read_single_reg(reg, data) \
-            do {                                        \
-                accelCsL();                             \
-                readWriteByte((reg) | 0x80);            \
-                readWriteByte(0x55);                    \
-                (data) = readWriteByte(0x55);           \
-                accelCsH();                             \
-            } while (0)
+#define BMI088_accel_read_single_reg(reg, data) \
+    do {                                        \
+        accelCsL();                             \
+        readWriteByte((reg) | 0x80);            \
+        readWriteByte(0x55);                    \
+        (data) = readWriteByte(0x55);           \
+        accelCsH();                             \
+    } while (0)
 
-        // #define BMI088_accel_write_muli_reg( reg,  data, len) { accelCsL(); BMI088_write_muli_reg(reg, data, len);
-        // accelCsH(); }
+    // #define BMI088_accel_write_muli_reg( reg,  data, len) { accelCsL(); BMI088_write_muli_reg(reg, data, len);
+    // accelCsH(); }
 
-        #define BMI088_accel_read_muli_reg(reg, data, len) \
-            do {                                           \
-                accelCsL();                                \
-                readWriteByte((reg) | 0x80);               \
-                readMuliReg<len>(reg, data);               \
-                accelCsH();                                \
-            } while (0)
+#define BMI088_accel_read_muli_reg(reg, data, len) \
+    do {                                           \
+        accelCsL();                                \
+        readWriteByte((reg) | 0x80);               \
+        readMuliReg<len>(reg, data);               \
+        accelCsH();                                \
+    } while (0)
 
-        #define BMI088_gyro_write_single_reg(reg, data) \
-            do {                                        \
-                gyroCsL();                              \
-                BMI088_write_single_reg((reg), (data)); \
-                gyroCsH();                              \
-            } while (0)
+#define BMI088_gyro_write_single_reg(reg, data) \
+    do {                                        \
+        gyroCsL();                              \
+        BMI088_write_single_reg((reg), (data)); \
+        gyroCsH();                              \
+    } while (0)
 
-        #define BMI088_gyro_read_single_reg(reg, data)  \
-            do {                                        \
-                gyroCsL();                              \
-                BMI088_read_single_reg((reg), &(data)); \
-                gyroCsH();                              \
-            } while (0)
+#define BMI088_gyro_read_single_reg(reg, data)  \
+    do {                                        \
+        gyroCsL();                              \
+        BMI088_read_single_reg((reg), &(data)); \
+        gyroCsH();                              \
+    } while (0)
 
-        // #define BMI088_gyro_write_muli_reg( reg,  data, len) { gyroCsL(); BMI088_write_muli_reg( ( reg ), ( data
-        // ), ( len ) ); gyroCsH(); }
+    // #define BMI088_gyro_write_muli_reg( reg,  data, len) { gyroCsL(); BMI088_write_muli_reg( ( reg ), ( data
+    // ), ( len ) ); gyroCsH(); }
 
-        #define BMI088_gyro_read_muli_reg(reg, data, len) \
-            do {                                          \
-                gyroCsL();                                \
-                readMuliReg<len>((reg), (data));          \
-                gyroCsH();                                \
-            } while (0)
+#define BMI088_gyro_read_muli_reg(reg, data, len) \
+    do {                                          \
+        gyroCsL();                                \
+        readMuliReg<len>((reg), (data));          \
+        gyroCsH();                                \
+    } while (0)
 
     uint8_t res = 0;
     uint8_t write_reg_num = 0;
@@ -683,22 +683,22 @@ private:
         BMI088_Read(&getFullData());
     }
 
-    #else
-    #endif
+#else
+#endif
 };
 
 }  // namespace rmdev::inline drivers
 
-    #undef GxOFFSET
-    #undef GyOFFSET
-    #undef GzOFFSET
-    #undef gNORM
+#undef GxOFFSET
+#undef GyOFFSET
+#undef GzOFFSET
+#undef gNORM
 
-    #undef BMI088_accel_write_single_reg
-    #undef BMI088_accel_read_single_reg
-    #undef BMI088_accel_read_muli_reg
-    #undef BMI088_gyro_write_single_reg
-    #undef BMI088_gyro_read_single_reg
-    #undef BMI088_gyro_read_muli_reg
+#undef BMI088_accel_write_single_reg
+#undef BMI088_accel_read_single_reg
+#undef BMI088_accel_read_muli_reg
+#undef BMI088_gyro_write_single_reg
+#undef BMI088_gyro_read_single_reg
+#undef BMI088_gyro_read_muli_reg
 
 #endif  // !RMDEV_DRIVER_BMI088_HPP

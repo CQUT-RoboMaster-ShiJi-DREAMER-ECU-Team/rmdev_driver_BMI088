@@ -12,6 +12,6 @@ module;
 export module rmdev.driver.bmi088;
 
 export namespace rmdev {
-    using ::rmdev::init_fail_max_count;
-    using ::rmdev::Bmi088;
-}
+using ::rmdev::Bmi088;
+using ::rmdev::init_fail_max_count;
+}  // namespace rmdev
